@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLUX_SYNTAX // RUNTIME TERMINAL</title>
+    
+    <meta name="description" content="Flux Syntax Terminal and Runtime Interpreter">
+    
+    <style>
+        :root {
+            --bg: #050507;
+            --green: #00ff66;
+            --cyan: #00f0ff;
+            --amber: #ffb700;
+            --purple: #bd93f9;
+            --dim: #4a5568;
+            --font: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--green);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            padding: 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal-history {
+            flex-grow: 1;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .line { margin-bottom: 0.25rem; }
+        .system-msg { color: var(--cyan); }
+        .syntax-msg { color: var(--purple); }
+        .alert-msg { color: var(--amber); }
+        .dim-msg { color: var(--dim); }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .prompt {
+            color: var(--cyan);
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        #cmd-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--green);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="terminal-history">
+        <div class="line system-msg">===========================================================</div>
+        <div class="line system-msg">   FLUX SYNTAX INTERPRETER v2.0.1 [LEGENDRIAN RUNTIME]   </div>
+        <div class="line system-msg">===========================================================</div>
+        <div class="line dim-msg">Type 'help' for system instructions or enter Flux expressions.</div>
+        <div class="line"></div>
+    </div>
+
+    <div class="input-line">
+        <span class="prompt">flux@braidmesh:~$</span>
+        <input type="text" id="cmd-input" autofocus autocomplete="off" spellcheck="false">
+    </div>
+
+    <script>
+        const input = document.getElementById('cmd-input');
+        const history = document.getElementById('terminal-history');
+
+        // Flux DSL AST & Runtime Engine
+        class FluxInterpreter {
+            constructor() {
+                this.manifoldState = {
+                    dimension: "5D Legendrian",
+                    retention: "O(1)",
+                    solitonIndex: 0.9984
+                };
+            }
+
+            parseAndExecute(rawInput) {
+                const tokens = rawInput.trim().split(/\s+/);
+                const command = tokens[0].toLowerCase();
+                const args = tokens.slice(1);
+
+                switch (command) {
+                    case 'help':
+                        return `FLUX RUNTIME COMMANDS & SYNTAX:
+  help                    - Display system documentation
+  status                  - Query 5D manifold state metrics
+  clear                   - Clear screen buffer
+  
+FLUX SYNTAX OPERATORS:
+  FLUX.INIT <manifold>    - Initialize topology vector (e.g. FLUX.INIT 5D_LEGENDRIAN)
+  EVAL <equation>         - Compute field dynamics (e.g. EVAL Sine-Gordon)
+  COMPILE <target>        - Compile field dynamics to target (e.g. COMPILE SHADER)`;
+
+                    case 'status':
+                        return `[MANIFOLD STATE METRICS]
+Dimension: ${this.manifoldState.dimension}
+Soliton Stability: ${this.manifoldState.solitonIndex}
+Topological Retention: ${this.manifoldState.retention}
+Domain Node: braidmesh.com`;
+
+                    case 'flux.init':
+                        const targetManifold = args[0] ? args[0].toUpperCase() : 'DEFAULT';
+                        this.manifoldState.dimension = targetManifold;
+                        return `[SYNTAX EXEC]: Initialized topology manifold [${targetManifold}]. Vector state set.`;
+
+                    case 'eval':
+                        const expr = args.join(" ");
+                        if (!expr) return `[SYNTAX ERROR]: EVAL requires expression parameter.`;
+                        return `[SYNTAX EXEC]: Evaluating field dynamics for '${expr}'...
+> Soliton wave vector aligned.
+> Field density stabilized at index 0.9991.`;
+
+                    case 'compile':
+                        const target = args[0] ? args[0].toUpperCase() : 'GPU';
+                        return `[SYNTAX EXEC]: Compiling topological weaves to ${target} field shaders...
+> Code generation complete. Zero compilation errors.`;
+
+                    default:
+                        return null; // Not a recognized command
+                }
+            }
+        }
+
+        const engine = new FluxInterpreter();
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const rawVal = input.value.trim();
+                
+                if (!rawVal) return;
+
+                // Echo user entry
+                appendLine(`flux@braidmesh:~$ ${rawVal}`, 'prompt');
+
+                if (rawVal.toLowerCase() === 'clear') {
+                    history.innerHTML = '';
+                } else {
+                    const output = engine.parseAndExecute(rawVal);
+                    if (output !== null) {
+                        appendLine(output, 'syntax-msg');
+                    } else {
+                        appendLine(`[SYNTAX UNRECOGNIZED]: '${rawVal}'. Type 'help' for valid operators.`, 'alert-msg');
+                    }
+                }
+
+                input.value = '';
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+
+        function appendLine(text, className) {
+            const div = document.createElement('div');
+            div.className = className || 'line';
+            div.textContent = text;
+            history.appendChild(div);
+        }
+
+        document.addEventListener('click', () => input.focus());
+    </script>
+</body>
+</html>
